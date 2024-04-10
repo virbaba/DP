@@ -96,8 +96,6 @@ public class Solution {
 
 					mat.get(i).set(j, 1 + Math.min(right, Math.min(diagonal, down)));
 					max = Math.max(max, mat.get(i).get(j));
-				} else {
-					mat.get(i).set(j, 0);
 				}
 			}
 		}
