@@ -1,27 +1,52 @@
-import java.util.*;
-public class Solution {
-    public static int minimumDishes(int n, int m, int[] arr) {
-        // Write your code here.
-         // Count the occurrences of each dish type
-        Map<Integer, Integer> dishCount = new HashMap<>();
+class Solution {
+    public static int solveRec(int[] satisfaction, int index, int n, int time){
+        if(index >= n)
+            return 0;
+        
+        int incl = satisfaction[index] * time + solveRec(satisfaction, index + 1, n, time + 1);
+        int excl = solveRec(satisfaction, index + 1, n, time);
 
-        for (int dish : arr) {
-            dishCount.put(dish, dishCount.getOrDefault(dish, 0) + 1);
-        }
+        return Math.max(incl, excl);
+    }
 
-        List<Integer> counts = new ArrayList<>(dishCount.values());
-        Collections.sort(counts);
+    public static int solveMemo(int[] satisfaction, int index, int n, int time, int[][] dp){
+        if(index >= n)
+            return 0;
+        
+        if(dp[index][time] != -1)
+            return dp[index][time];
 
-        int variety = counts.size();
-        for (int count : counts) {
-            if (m >= count) {
-                m -= count;
-                variety--;
-            } else {
-                break;
+        int incl = satisfaction[index] * time + solveMemo(satisfaction, index + 1, n, time + 1,dp);
+        int excl = solveMemo(satisfaction, index + 1, n, time, dp);
+
+        return dp[index][time] = Math.max(incl, excl);
+    }
+
+    public static int solveTab(int[] satisfaction){
+        Arrays.sort(satisfaction);
+        int n = satisfaction.length;
+        int[][] dp = new int[n+1][n+1];
+
+        for(int index = n - 1; index >= 0; index--){
+            for(int time = index; time >= 0; time--){
+                int incl = satisfaction[index] * (time + 1) + dp[index + 1][time + 1];
+                int excl = dp[index + 1][time];
+                dp[index][time] = Math.max(incl, excl);
             }
         }
 
-        return variety;
+        
+
+        return dp[0][0];
+    }
+
+    public int maxSatisfaction(int[] satisfaction) {
+        Arrays.sort(satisfaction); 
+        int max = 0, sum = 0;
+        for (int i = satisfaction.length - 1; i >= 0 && satisfaction[i] > -sum; i--) {
+            sum += satisfaction[i];
+            max += sum;
+        }
+        return max;
     }
 }
