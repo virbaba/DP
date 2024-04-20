@@ -41,12 +41,14 @@ class Solution {
     }
 
     public int maxSatisfaction(int[] satisfaction) {
-        Arrays.sort(satisfaction); 
-        int max = 0, sum = 0;
-        for (int i = satisfaction.length - 1; i >= 0 && satisfaction[i] > -sum; i--) {
-            sum += satisfaction[i];
-            max += sum;
+        int sum=0,res=0;
+        int n=satisfaction.length;
+        Arrays.sort(satisfaction);
+        for(int i=n-1;i>=0;i--){
+            sum+=satisfaction[i];
+            if(sum<0) break;
+            res+=sum;
         }
-        return max;
+        return res;
     }
 }
