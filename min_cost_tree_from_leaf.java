@@ -1,46 +1,56 @@
 class Solution {
     public int mctFromLeafValues(int[] arr) {
         int n = arr.length;
-        // To Store maximum value between the range
-        Map<Pair<Integer, Integer>, Integer> max = new HashMap<>();
-        for(int i = 0; i < n; i++){
-            max.put(new Pair(i,i), arr[i]);
-            for(int j = i + 1; j < n; j++){
-                max.put(new Pair(i, j), Math.max(arr[j], max.get(new Pair(i, j - 1))));
+
+        // 2D array to store maximum values from index i to j
+        int[][] max = new int[n][n];
+
+        // Initialize the 2D array
+        for (int i = 0; i < n; i++) {
+            max[i][i] = arr[i];
+            for (int j = i + 1; j < n; j++) {
+                max[i][j] = Math.max(arr[j], max[i][j - 1]);
             }
         }
 
-        // return helper(arr, max, 0, n - 1);
-        
-        int[][] dp = new int[n + 1][n + 1];
-        for(int[] row : dp) Arrays.fill(row, -1);
-        return helperMem(arr, max, 0, n - 1, dp);
+        // Print the 2D array
+        for (int i = 0; i < n; i++) {
+            for (int j = i; j < n; j++) {
+                System.out.println("Max value from index " + i + " to " + j + " is: " + max[i][j]);
+            }
+        }
+
+        // 2D array to memoize minimum costs
+        Integer[][] dp = new Integer[n][n];
+
+        // Recursive function to find minimum cost
+        return findMinCost(arr, 0, n - 1, max, dp);
     }
 
-    public int helper(int[] arr, Map<Pair<Integer, Integer>, Integer> max, int left, int right){
-        if(left == right) return 0;
-        int ans = Integer.MAX_VALUE;
-
-        for(int i = left; i < right; i++){
-            ans = Math.min(ans, 
-                max.get(new Pair(left, i)) * max.get(new Pair(i + 1, right)) 
-                + helper(arr, max, left, i) + helper(arr, max, i + 1, right)
-                );
+    private static int findMinCost(int[] arr, int start, int end, int[][] max, Integer[][] dp) {
+        // Base case: if the subarray has only one element, cost is 0
+        if (start == end) {
+            return 0;
         }
-        return ans;
-    }
 
-    public int helperMem(int[] arr, Map<Pair<Integer, Integer>, Integer> max, int left, int right, int[][] dp){
-        if(left == right) return 0;
-        if(dp[left][right] != -1) return dp[left][right];
-        int ans = Integer.MAX_VALUE;
-
-        for(int i = left; i < right; i++){
-            ans = Math.min(ans, 
-                max.get(new Pair(left, i)) * max.get(new Pair(i + 1, right)) 
-                + helperMem(arr, max, left, i, dp) + helperMem(arr, max, i + 1, right, dp)
-                );
+        // If result is already computed, return it
+        if (dp[start][end] != null) {
+            return dp[start][end];
         }
-        return dp[left][right] = ans;
+
+        int minCost = Integer.MAX_VALUE;
+
+        // Try all possible partitions
+        for (int k = start; k < end; k++) {
+            int leftCost = findMinCost(arr, start, k, max, dp);
+            int rightCost = findMinCost(arr, k + 1, end, max, dp);
+            int cost = leftCost + rightCost + max[start][k] * max[k + 1][end];
+            minCost = Math.min(minCost, cost);
+        }
+
+        // Memoize the result
+        dp[start][end] = minCost;
+
+        return minCost;
     }
 }
